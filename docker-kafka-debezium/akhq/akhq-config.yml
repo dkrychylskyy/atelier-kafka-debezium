@@ -1,0 +1,5 @@
+akhq:
+  connections:
+    mon-cluster-kafka:
+      properties:
+        bootstrap.servers: "kafka:9092"

@@ -1,0 +1,91 @@
+version: '3'
+services:
+  postgres: # nom du service à utiliser dans la conf de connexion dans PgAdmin 
+    image: postgres:13
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_INITDB_ARGS: "--wal_level=logical"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data #permet de conserver l'état de container dans le volume
+      - ./init:/docker-entrypoint-initdb.d/
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    # volumes:
+    # - zookeeper_data:/var/lib/zookeeper/data
+  
+  kafka:
+    image: confluentinc/cp-kafka:7.0.0
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    # volumes:
+    #   - kafka_data:/var/lib/kafka/data
+  
+  debezium:
+    image: debezium/connect:latest
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: mygroup
+      CONFIG_STORAGE_TOPIC: debezium-config
+      OFFSET_STORAGE_TOPIC: debezium-offsets
+      STATUS_STORAGE_TOPIC: debezium-status
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+    volumes:
+      - ./debezium-plugins:/kafka/connect/debezium-plugins
+      - debezium_data:/kafka/data
+    depends_on:
+      - kafka
+    ports:
+      - "8083:8083"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: your@email.com
+      PGADMIN_DEFAULT_PASSWORD: your_password
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  akhq:
+    image: tchiotludo/akhq
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            mon-cluster-kafka:
+              properties:
+                bootstrap.servers: "kafka:9092"
+                connect:
+                  - name: "connect-cluster"
+                    url: "http://kafka:9092"  # L'URL doit correspondre au service Kafka Connect.
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data: # volume pour persister l'état de la BDD
+  pgadmin_data: # volume pour persister la conf de PGAdmin
+  # kafka_data:
+  debezium_data:
+  # schema_registry_data:
+  # zookeeper_data:

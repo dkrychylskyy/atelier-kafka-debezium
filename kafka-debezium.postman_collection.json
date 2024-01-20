@@ -1,0 +1,87 @@
+{
+	"info": {
+		"_postman_id": "7c5c8c87-fac6-47ab-9317-9bda248f9ff1",
+		"name": "kafka-debezium",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2096363"
+	},
+	"item": [
+		{
+			"name": "Consulter connecteurs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/connectors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Créer connecteur",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"debezium-pg-1\",\r\n    \"config\": {\r\n        \"connector.class\": \"io.debezium.connector.postgresql.PostgresConnector\",\r\n        \"tasks.max\": \"1\",\r\n        \"plugin.name\": \"pgoutput\",\r\n        \"database.hostname\": \"postgres\",\r\n        \"database.port\": \"5432\",\r\n        \"database.user\": \"debezium\",\r\n        \"database.password\": \"debezium\",\r\n        \"database.dbname\": \"mydb\",\r\n        \"database.server.name\": \"PGServer\",\r\n\t\t\t\t\"slot.name\": \"debezium_slot\",\r\n\t\t\t\t\"publication.name\": \"dbz_publication\",\r\n        \"table.include.list\": \"\",\r\n        \"key.converter\": \"org.apache.kafka.connect.json.JsonConverter\",\r\n        \"value.converter\": \"org.apache.kafka.connect.json.JsonConverter\",\r\n        \"key.converter.schemas.enable\": \"false\",\r\n        \"value.converter.schemas.enable\": \"false\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8083/connectors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MAJ Connecteur",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"connector.class\": \"io.debezium.connector.postgresql.PostgresConnector\",\r\n        \"tasks.max\": \"1\",\r\n        \"plugin.name\": \"pgoutput\",\r\n        \"database.hostname\": \"postgres\",\r\n        \"database.port\": \"5432\",\r\n        \"database.user\": \"debezium\",\r\n        \"database.password\": \"debezium\",\r\n        \"database.dbname\": \"mydb\",\r\n        \"database.server.name\": \"PGServer\",\r\n\t\t\t\t\"slot.name\": \"debezium_slot\",\r\n\t\t\t\t\"publication.name\": \"dbz_publication\",\r\n        \"table.include.list\": \"public.clients, public.commandes\",\r\n        \"key.converter\": \"org.apache.kafka.connect.json.JsonConverter\",\r\n        \"value.converter\": \"org.apache.kafka.connect.json.JsonConverter\",\r\n        \"key.converter.schemas.enable\": \"false\",\r\n        \"value.converter.schemas.enable\": \"false\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8083/connectors/debezium-pg-1/config",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors",
+						"debezium-pg-1",
+						"config"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
