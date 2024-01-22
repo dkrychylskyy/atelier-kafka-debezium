@@ -85,7 +85,4 @@ services:
 volumes:
   postgres_data: # volume pour persister l'état de la BDD
   pgadmin_data: # volume pour persister la conf de PGAdmin
-  # kafka_data:
   debezium_data:
-  # schema_registry_data:
-  # zookeeper_data:
